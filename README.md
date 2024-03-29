@@ -40,7 +40,11 @@ Given a video file or group of video files, as a user I want to
 3. For each file.
 
    3.1. Extract audio, write audio file.
+
    3.2. Clean audio removing background noise.
+
    3.3. Speech Recognition and return translated and transcribed text.
+
    3.4. Read (Text To Speech) translated audio.
+
    3.5. Assemble translated audio to video.
