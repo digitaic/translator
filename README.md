@@ -10,9 +10,6 @@ A text, voice and video translator.
   - Translated captions over video, original audio
   - Translated captions over video, translated audio
   - Translated voice over video.
--
-
-#
 
 ## WHY
 
@@ -41,6 +38,7 @@ Given a video file or group of video files, as a user I want to
 1. Upload all files.
 2. Write a manifesto listing each file name, size, mime type and ordinal.
 3. For each file.
+
    3.1. Extract audio, write audio file.
    3.2. Clean audio removing background noise.
    3.3. Speech Recognition and return translated and transcribed text.
