@@ -4,4 +4,3 @@
 # send each audio to stage 2: translataion in any language (currently whisper only translates to EN)
 
 import os
-
