@@ -1,7 +1,10 @@
 import time
 import math
 import ffmpeg
+from googletrans import Translator 
 from faster_whisper import WhisperModel
+
+translator = Translator()
 
 source_location = 'source/video/'
 input_video = 'hebrew_interview.mp4'
@@ -9,6 +12,8 @@ input_video = 'hebrew_interview.mp4'
 input_video_name = input_video.replace(".mp4", "")
 #input_video_name = input_video.replace(".wav", "")
 extracted_audio_location = 'process/audio/'
+transcribed_text = 'transcribed.txt'
+out_lan = 'en'
 
 def extract_audio():
     extracted_audio = f"audio-{input_video_name}.wav"
@@ -24,10 +29,22 @@ def transcribe(audio):
     language = info[0]
     print("Transcription Language ", info[0], info.language_probability)
     segments = list(segments)
+    #f = open('transcribed.txt', 'w')
     for segment in segments:
         # print(segment)
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, translate_text(segment.text, 'he', 'es')))
+        #f.write(str(segment.text))
     return language, segments
+
+def detect_input_language(text):
+    input_lan = translator.detect(text)
+    print(input_lan)
+    return input_lan
+def translate_text(text, input_lan, out_lan) :
+    t = translator.translate(text, src= input_lan, dest=out_lan)
+    return str(t.text)
+    #f = open('res.txt', 'w')
+    #f.write(str(t.text))
 
 def format_time(seconds):
     hours = math.floor(seconds / 3600)
@@ -39,17 +56,26 @@ def format_time(seconds):
     formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}"
     return formatted_time
 
-def generate_subtitle_file(language, segments):
+def generate_subtitle_file(translated, language, segments):
     subtitle_file = f"sub-{input_video_name}.{language}.srt"
     text = ""
-    for index, segment in enumerate(segments):
-        segment_start = format_time(segment.start)
-        segment_end = format_time(segment.end)
-        text += f"{str(index+1)} \n"
-        text += f"{segment_start} --> {segment_end} \n"
-        text += f"{segment.text} \n"
-        text += "\n"
-    
+    if translated:
+        for index, segment in enumerate(segments):
+            segment_start = format_time(segment.start)
+            segment_end = format_time(segment.end)
+            text += f"{str(index+1)} \n"
+            text += f"{segment_start} --> {segment_end} \n"
+            text += f"{translate_text(segment.text, language, out_lan)} \n"
+            text += "\n"
+    else: 
+        for index, segment in enumerate(segments):
+            segment_start = format_time(segment.start)
+            segment_end = format_time(segment.end)
+            text += f"{str(index+1)} \n"
+            text += f"{segment_start} --> {segment_end} \n"
+            text += f"{segment.text} \n"
+            text += "\n"
+
     f = open(subtitle_file, "w")
     f.write(text)
     f.close()
@@ -75,10 +101,13 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
                                vf=f"subtitles={subtitle_file}")
         ffmpeg.run(stream, overwrite_output=True)
 
+
+
+
 def run():
     extracted_audio = extract_audio()
     language, segments = transcribe(extracted_audio)
-    subtitle_file = generate_subtitle_file(language=language, segments = segments)
+    subtitle_file = generate_subtitle_file(translated=True, language=language, segments = segments)
 
     add_subtitle_to_video(
         soft_subtitle=True,

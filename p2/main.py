@@ -1,20 +1,30 @@
-import time
-import math
-import ffmpeg
+# googletrans==3.1.0a0
+from googletrans import Translator 
 
-from faster_whisper import WhisperModel
+import speech_recognition as sr
 
-input_video = 'source/video/hebrew_interview.mp4'
-input_video_name = inpt_video.replace(".mp4", "")
+from gtts import gTTS
+import os
+
+translator = Translator()
+
+source = open('source/text/ts-1.txt')
+source = source.read()
+dest_lan = 'en'
+
+def detect_input_language(text):
+    input_lan = translator.detect(str(text))
+    print(input_lan)
+    return input_lan
+def translate(text, dest_lan):
+    t = translator.translate(text, src= 'he', dest=dest_lan)
+    #print(str(t))
+    f = open('res.txt', 'w')
+    f.write(str(t.text))
 
 
-source = 'source/audio/audio-spa.wav'
-# source = 'source/audio/hebrew_interview.wav'
-model = whisper.load_model('base')
+def run():
+    detect_input_language(source)
+    translate(str(source), dest_lan)
 
-result = model.transcribe(source, response_format='srt', fp16=False)
-print(result["text"])
-
-# f = open('result/text/hebrew_interview.srt', 'w+')
-f = open('result/text/audio-spa.srt', 'w+')
-f.write(str(result["text"]))
+run()
