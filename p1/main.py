@@ -8,14 +8,21 @@ translator = Translator()
 
 source_location = 'source/video/'
 #input_video = 'clase-15.mp4'
-input_video = 'he.mp4'
+input_video = '2.wav'
+#input_video = 'he.mp4'
 # input_video = 'audio-spa.wav'
-input_video_name = input_video.replace(".mp4", "")
-# input_video_name = input_video.replace(".wav", "")
+#input_video_name = input_video.replace(".mp4", "")
+input_video_name = input_video.replace(".wav", "")
 extracted_audio_location = 'process/audio/'
 transcribed_text = 'transcribed.txt'
-out_lan = 'en'
+out_lan = 'pol'
 
+
+prompt = (
+    f"This is a podcast audio file which talks about data and teaches how to use Microsoft Power BI."
+    f"Teacher is Sonia a female whose native language is spanish from Latin America.  Her talk is highly technical."
+    f"This file will be transcribed and translated to multiple languages"
+)
 
 def extract_audio():
     extracted_audio = f"audio-{input_video_name}.wav"
@@ -28,7 +35,7 @@ def extract_audio():
 
 def transcribe(audio):
     model = WhisperModel('medium')
-    segments, info = model.transcribe(audio, beam_size=3)
+    segments, info = model.transcribe(audio, beam_size=5, initial_prompt=prompt)
     language = info[0]
     print("Transcription Language ", info[0], info.language_probability)
     segments = list(segments)
@@ -41,18 +48,10 @@ def transcribe(audio):
     return language, segments
 
 
-def detect_input_language(text):
-    input_lan = translator.detect(text)
-    print(input_lan)
-    return input_lan
-
-
 def translate_text(text, input_lan, out_lan):
-    t = translator.translate(text, src=input_lan, dest=out_lan)
-    return str(t.text)
-    # f = open('res.txt', 'w')
-    # f.write(str(t.text))
-
+    return translator.translate(text, src=input_lan, dest=out_lan).text
+    # f = open('res', 'w')
+    # f.write(str(t))
 
 def format_time(seconds):
     hours = math.floor(seconds / 3600)
@@ -123,6 +122,5 @@ def run():
         subtitle_file=subtitle_file,
         subtitle_language=language
     )
-
 
 run()
