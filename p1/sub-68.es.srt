@@ -1,0 +1,112 @@
+1 
+00:00:0,000 --> 00:00:9,660 
+Hello. Now we are going to learn how to create new measures with the function x. There is sum and sum x, average 
+
+2 
+00:00:9,660 --> 00:00:19,280 
+y average x, max y max x, mean y mean x. The difference between average and average x is that 
+
+3 
+00:00:19,280 --> 00:00:25,800 
+average calculates the average of a specific column across the entire table, while 
+
+4 
+00:00:25,800 --> 00:00:33,920 
+average x calculates the average of a custom expression evaluated row by row in a 
+
+5 
+00:00:33,920 --> 00:00:40,880 
+table and then take the average of those results. A custom expression is a formula written 
+
+6 
+00:00:40,880 --> 00:00:49,440 
+in DAX.A measure is a custom expression.To understand the difference well, let's look at an example.Let's go 
+
+7 
+00:00:49,440 --> 00:00:57,120 
+to create the new age average measure in the Olympic events table. We click on new measure and 
+
+8 
+00:00:57,120 --> 00:01:8,160 
+We name the measure that we said is age average and this will be equal to average x.Here 
+
+9 
+00:01:8,160 --> 00:01:16,320 
+is the values ​​that are in each row for the different games, that is, for each of 
+
+10 
+00:01:16,320 --> 00:01:30,640 
+the Olympic games. So that means the values ​​of games, we close parentheses, comma and 
+
+11 
+00:01:30,640 --> 00:01:39,880 
+We are going to calculate, calculate for each of those games the average of the age column. 
+
+12 
+00:01:46,320 --> 00:02:0,400 
+And we close parentheses and enter.Here we have our age average.Average x measurement allows us to get the 
+
+13 
+00:02:0,400 --> 00:02:6,800 
+average of the column but taking into account blocks of rows, in this case the Olympic games, 
+
+14 
+00:02:6,800 --> 00:02:14,120 
+that is, the different Olympics. In the visualization module we are going to open a page, 
+
+15 
+00:02:14,520 --> 00:02:23,880 
+We are going to call it x and we are going to create a matrix and place games in rows 
+
+16 
+00:02:26,400 --> 00:02:32,840 
+and the new measure in values, age average in values. 
+
+17 
+00:02:35,280 --> 00:02:42,920 
+And so we can see the average age in each of the Olympics and the average age in 
+
+18 
+00:02:42,920 --> 00:02:51,280 
+all the games it has been 25.8 years. Let's see the difference with average, we are going to go to 
+
+19 
+00:02:51,280 --> 00:03:1,000 
+transform data, that is, in power query and we are going to select our olímpic events dataset 
+
+20 
+00:03:2,600 --> 00:03:8,880 
+and we are going to click on the header of the age variable, we verify that the type of 
+
+21 
+00:03:8,880 --> 00:03:15,640 
+data is an integer, it actually has the whole number icon and we are going to locate the 
+
+22 
+00:03:15,640 --> 00:03:25,200 
+module number column at the top, being in transform and here is number column and let's go 
+
+23 
+00:03:25,200 --> 00:03:36,960 
+to click on the statistical functions to locate average.Power query shows us the result, 
+
+24 
+00:03:36,960 --> 00:03:44,160 
+This is the average age of all the athletes who have competed in all the Olympic Games of the 
+
+25 
+00:03:44,160 --> 00:03:51,040 
+history until 2016, but with average we cannot know the average age for each of the 
+
+26 
+00:03:51,040 --> 00:03:57,960 
+Olympic games, as we see the value is different because this is a single average of all the 
+
+27 
+00:03:57,960 --> 00:04:4,520 
+numbers in the age column, with average x the average of the age averages is calculated 
+
+28 
+00:04:4,520 --> 00:04:11,240 
+of each Olympics. In the next class we will see the rank x function, see you 
+
