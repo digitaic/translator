@@ -3,19 +3,33 @@ import math
 import ffmpeg
 from faster_whisper import WhisperModel
 from pathlib import Path
-from openai import OpenAI
 from googletrans import Translator
-from dotenv import load_dotenv
+from gtts import gTTS
+#from dotenv import load_dotenv
+#from bark import SAMPLE_RATE, generate_audio, preload_models
+#from scipy.io.wavfile import write as write_wav
+#from IPython.display import Audio
+#import nltk
+#import numpy as np
 import os
 
-load_dotenv()
+#load_dotenv()
 
 translator = Translator()
+#preload_models()
+text_prompt = """
+     Hello, my name is Suno. And, uh — and I like pizza. [laughs] 
+     But I also have other interests such as playing tic tac toe.
+"""
+#audio_array = generate_audio(text.read())
 
-openaiAK = os.environ["OPENAI_API_KEY"]
-client = OpenAI(
-    organization=os.environ["OPENAI_ORG_ID"]
-)
+# save audio to disk
+#write_wav("bark_generation.wav", SAMPLE_RATE, audio_array)
+  
+# play text in notebook
+#Audio(audio_array, rate=SAMPLE_RATE)
+
+#openaiAK = os.environ["OPENAI_API_KEY"]
 
 source_location = 'source/video/'
 # input_video = 'clase-15.mp4'
@@ -25,7 +39,6 @@ input_video = '68.mp4'
 # input_video_name = input_video.replace(".mp4", "")
 input_video_name = input_video.replace(".mp4", "")
 extracted_audio_location = 'process/audio/'
-transcribed_text = 'transcribed.txt'
 out_lan = 'en'
 
 
@@ -52,25 +65,20 @@ def extract_audio():
 
 def transcribe(audio):
     model = WhisperModel('medium')
-    segments, info = model.transcribe(
-        audio, beam_size=5, initial_prompt=prompt)
+    segments, info = model.transcribe(audio, beam_size=5, initial_prompt=prompt)
     language = info[0]
     print("Transcription Language ", info[0], info.language_probability)
     segments = list(segments)
-    f = open('transcribed.txt', 'w')
+    f = open('transcribed_text.txt', 'w')
     for segment in segments:
         # print(segment)
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
-              translate_text(segment.text, 'es', 'en')))
+        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, translate_text(segment.text, 'es', 'en')))
         f.write(str(segment.text))
     return language, segments
 
 
 def translate_text(text, input_lan, out_lan):
     return translator.translate(text, src=input_lan, dest=out_lan).text
-    # f = open('res', 'w')
-    # f.write(str(t))
-
 
 def format_time(seconds):
     hours = math.floor(seconds / 3600)
@@ -84,8 +92,11 @@ def format_time(seconds):
 
 
 def generate_subtitle_file(translated, language, segments):
+    t = open('translated_text.txt', 'a')
     subtitle_file = f"sub-{input_video_name}.{language}.srt"
     text = ""
+    text_to_read = ""
+
     if translated:
         for index, segment in enumerate(segments):
             segment_start = format_time(segment.start)
@@ -94,6 +105,8 @@ def generate_subtitle_file(translated, language, segments):
             text += f"{segment_start} --> {segment_end} \n"
             text += f"{translate_text(segment.text, language, out_lan)} \n"
             text += "\n"
+            text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
+            text_to_read += "\n"
     else:
         for index, segment in enumerate(segments):
             segment_start = format_time(segment.start)
@@ -106,6 +119,8 @@ def generate_subtitle_file(translated, language, segments):
     f = open(subtitle_file, "w")
     f.write(text)
     f.close()
+    t.write(text_to_read)
+    t.close()
 
     return subtitle_file
 
@@ -129,18 +144,16 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
                                vf=f"subtitles={subtitle_file}")
         ffmpeg.run(stream, overwrite_output=True)
 
-
 def read_text(file):
     f = open(file, 'r')
     return str(f.read())
 
+
 def text_to_speech(text, language):
-    response = client.audio.speech.create(
-        model="tts-1",
-        voice="shimmer",
-        input=read_text("transcribed.txt")
-    )
-    #response.stream_to_file("translated-audio.mp3")
+    f = open(text)
+    tts = gTTS(f.read(), lang='en', tld='us')
+    tts.save('p1.mp3')
+
 
 def run():
     extracted_audio = extract_audio()
@@ -153,6 +166,7 @@ def run():
         subtitle_file=subtitle_file,
         subtitle_language=language
     )
-    text_to_speech("transcribed.txt", 'en')
+    text_to_speech("translated_text.txt", 'en')
+
 
 run()
