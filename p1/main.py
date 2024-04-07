@@ -5,6 +5,7 @@ from faster_whisper import WhisperModel
 from pathlib import Path
 from googletrans import Translator
 from gtts import gTTS
+from ffmpeg import FFmpeg
 #from dotenv import load_dotenv
 #from bark import SAMPLE_RATE, generate_audio, preload_models
 #from scipy.io.wavfile import write as write_wav
@@ -53,6 +54,14 @@ prompt = (
     f"It contains the list of medals earned by each delegation."
 )
 
+def clean_audio(audio):
+    stream = ffmpeg.input("audio-spa.wav")
+    stream = ffmpeg.output(
+            "clean_audio_spa.wav",
+            vf = "highpass=f=199, lowpass=f=3000",
+        )
+    ffmpeg.run(stream)
+    #return clean
 
 def extract_audio():
     extracted_audio = f"audio-{input_video_name}.wav"
@@ -157,16 +166,18 @@ def text_to_speech(text, language):
 
 def run():
     extracted_audio = extract_audio()
+    clean_audio(extracted_audio)
+    """
     language, segments = transcribe(extracted_audio)
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments)
-
+    
     add_subtitle_to_video(
         soft_subtitle=True,
         subtitle_file=subtitle_file,
         subtitle_language=language
     )
     text_to_speech("translated_text.txt", 'en')
-
+    """
 
 run()
