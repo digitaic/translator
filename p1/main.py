@@ -1,44 +1,21 @@
 import time
 import math
-import ffmpeg
+from pathlib import Path
 from faster_whisper import WhisperModel
 from pathlib import Path
 from googletrans import Translator
 from gtts import gTTS
-from ffmpeg import FFmpeg
+import ffmpeg
+from scipy.io import wavfile
 #from dotenv import load_dotenv
-#from bark import SAMPLE_RATE, generate_audio, preload_models
-#from scipy.io.wavfile import write as write_wav
-#from IPython.display import Audio
-#import nltk
-#import numpy as np
 import os
-
 #load_dotenv()
 
 translator = Translator()
-#preload_models()
-text_prompt = """
-     Hello, my name is Suno. And, uh — and I like pizza. [laughs] 
-     But I also have other interests such as playing tic tac toe.
-"""
-#audio_array = generate_audio(text.read())
 
-# save audio to disk
-#write_wav("bark_generation.wav", SAMPLE_RATE, audio_array)
-  
-# play text in notebook
-#Audio(audio_array, rate=SAMPLE_RATE)
-
-#openaiAK = os.environ["OPENAI_API_KEY"]
-
-source_location = 'source/video/'
-# input_video = 'clase-15.mp4'
 input_video = '68.mp4'
-# input_video = 'he.mp4'
-# input_video = 'audio-spa.wav'
-# input_video_name = input_video.replace(".mp4", "")
-input_video_name = input_video.replace(".mp4", "")
+input_video_name, file_ext = os.path.splitext(input_video)
+source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
 
@@ -54,23 +31,18 @@ prompt = (
     f"It contains the list of medals earned by each delegation."
 )
 
-def clean_audio(audio):
-    stream = ffmpeg.input("audio-spa.wav")
-    stream = ffmpeg.output(
-            "clean_audio_spa.wav",
-            vf = "highpass=f=199, lowpass=f=3000",
-        )
-    ffmpeg.run(stream)
-    #return clean
+def clean_audio():
+    audio = f"audio-{input_video_name}.wav"
+    stream = ffmpeg.input(audio)
+    stream = ffmpeg.output(stream, f"clean-audio-{input_video_name}.wav")
+    ffmpeg.run(stream, overwrite_output=True)
+    #-af "highpass=f=300,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20,dialoguenhance,lowpass=f=3000"
 
 def extract_audio():
     extracted_audio = f"audio-{input_video_name}.wav"
     stream = ffmpeg.input(input_video)
-    # stream = ffmpeg.output(stream, f"{extracted_audio_location}{extracted_audio}")
-    stream = ffmpeg.output(stream, f"{extracted_audio}")
+    stream = ffmpeg.output(stream, extracted_audio)
     ffmpeg.run(stream, overwrite_output=True)
-    return extracted_audio
-
 
 def transcribe(audio):
     model = WhisperModel('medium')
@@ -78,7 +50,7 @@ def transcribe(audio):
     language = info[0]
     print("Transcription Language ", info[0], info.language_probability)
     segments = list(segments)
-    f = open('transcribed_text.txt', 'w')
+    f = open(f'transcribed-{input_video_name}.txt', 'w')
     for segment in segments:
         # print(segment)
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, translate_text(segment.text, 'es', 'en')))
@@ -101,7 +73,7 @@ def format_time(seconds):
 
 
 def generate_subtitle_file(translated, language, segments):
-    t = open('translated_text.txt', 'a')
+    t = open(f"translated-{input_video_name}.txt", "a")
     subtitle_file = f"sub-{input_video_name}.{language}.srt"
     text = ""
     text_to_read = ""
@@ -135,7 +107,6 @@ def generate_subtitle_file(translated, language, segments):
 
 
 def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
-
     video_input_stream = ffmpeg.input(input_video)
     subtitle_input_stream = ffmpeg.input(subtitle_file)
     output_video = f"output-{input_video_name}.mp4"
@@ -161,14 +132,22 @@ def read_text(file):
 def text_to_speech(text, language):
     f = open(text)
     tts = gTTS(f.read(), lang='en', tld='us')
-    tts.save('p1.mp3')
+    tts.save(f"translated-audio-{input_video_name}.wav")
 
+
+def add_translated_audio_to_video():
+    # remove original audio
+    stream = ffmpeg.input("output-68.mp4", an=None)
+    # add translated audio
+    trans_audio = ffmpeg.input("translated-audio-68.wav")
+    stream = ffmpeg.output(stream, trans_audio, "final-68.mp4")
+    ffmpeg.run(stream, overwrite_output=True)
 
 def run():
-    extracted_audio = extract_audio()
-    clean_audio(extracted_audio)
-    """
-    language, segments = transcribe(extracted_audio)
+    extract_audio()
+    clean_audio()
+    source_audio = f"clean-audio-{input_video_name}.wav"
+    language, segments = transcribe(source_audio)
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments)
     
@@ -177,7 +156,7 @@ def run():
         subtitle_file=subtitle_file,
         subtitle_language=language
     )
-    text_to_speech("translated_text.txt", 'en')
-    """
+    text_to_speech(f"translated-{input_video_name}.txt", 'en')
+    add_translated_audio_to_video()
 
 run()
