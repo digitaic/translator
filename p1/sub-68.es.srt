@@ -32,11 +32,11 @@ We name him as we said that he is Age avege and this will be the same as average
 
 9 
 00:01:8,160 --> 00:01:16,320 
-It is of the values that are in each row for the different games, that is, for each of 
+It is of the values ​​that are in each row for the different games, that is, for each of 
 
 10 
 00:01:16,320 --> 00:01:30,640 
-The Olympic Games. Then that means the values of Games, we close parentheses, coma and 
+The Olympic Games. Then that means the values ​​of Games, we close parentheses, coma and 
 
 11 
 00:01:30,640 --> 00:01:39,880 

@@ -47,6 +47,7 @@ def extract_audio():
     stream = ffmpeg.output(stream, extracted_audio)
     ffmpeg.run(stream, overwrite_output=True)
 
+
 def transcribe(audio):
     model = WhisperModel('medium')
     segments, info = model.transcribe(
@@ -64,7 +65,7 @@ def transcribe(audio):
 
 
 def translate_text(text, input_lan, out_lan):
-    return translator.translate(text, src=input_lan, dest=out_lan).text
+    return translator.translate(str(text), src=input_lan, dest=out_lan).text
 
 
 def format_time(seconds):
@@ -144,13 +145,13 @@ def text_to_speech(text, language):
 
 def add_translated_audio_to_video():
     # remove original audio
-    stream = ffmpeg.input("output-68.mp4", an=None)
+    input_video = ffmpeg.input("output-68.mp4", an=None)
     # add translated audio
-    trans_audio = ffmpeg.input("translated-audio-68.wav")
-    #stream = ffmpeg.output(stream, trans_audio, "final-68.mp4")
-    t = ffmpeg.filter(trans_audio)
-    t = ffmpeg.output(stream, "final-68.mp4", vcodec='copy')
-    t.run()
+    input_audio = ffmpeg.input("translated-audio-68.wav").audio
+    (ffmpeg
+    .concat(input_video, input_audio, v=1, a=1)
+    .output("final-68.mp4")
+    .run(overwrite_output=True))
 
 
 def run():
