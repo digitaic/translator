@@ -6,7 +6,6 @@ from pathlib import Path
 from googletrans import Translator
 from gtts import gTTS
 import ffmpeg
-from pydub import AudioSegment
 from scipy.io import wavfile
 # from dotenv import load_dotenv
 import os
@@ -31,7 +30,6 @@ prompt = (
     f"It contains data about year of event, country, delegations, athletes ages, athletes height, weight, Body Mass Index BMI."
     f"It contains the list of medals earned by each delegation."
 )
-
 
 def clean_audio():
     audio = f"audio-{input_video_name}.wav"
@@ -59,7 +57,7 @@ def transcribe(audio):
     for segment in segments:
         # print(segment)
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
-              translate_text(segment.text, 'es', 'en')))
+              translate_text(segment.text, 'es', out_lan)))
         f.write(str(segment.text))
     return language, segments
 
@@ -81,36 +79,41 @@ def format_time(seconds):
 
 def generate_subtitle_file(translated, language, segments):
     t = open(f"translated-{input_video_name}.txt", "a")
-    subtitle_file = f"sub-{input_video_name}.{language}.srt"
-    text = ""
+    trans_text = ""
+    original_text = ""
+    trans_text_to_read = ""
     text_to_read = ""
 
-    if translated:
-        for index, segment in enumerate(segments):
-            segment_start = format_time(segment.start)
-            segment_end = format_time(segment.end)
-            text += f"{str(index+1)} \n"
-            text += f"{segment_start} --> {segment_end} \n"
-            text += f"{translate_text(segment.text, language, out_lan)} \n"
-            text += "\n"
-            text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
-            text_to_read += "\n"
-    else:
-        for index, segment in enumerate(segments):
-            segment_start = format_time(segment.start)
-            segment_end = format_time(segment.end)
-            text += f"{str(index+1)} \n"
-            text += f"{segment_start} --> {segment_end} \n"
-            text += f"{segment.text} \n"
-            text += "\n"
+    trans_subtitle_file = f"sub-{input_video_name}-{out_lan}.srt"
+    for index, segment in enumerate(segments):
+        segment_start = format_time(segment.start)
+        segment_end = format_time(segment.end)
+        trans_text += f"{str(index+1)} \n"
+        trans_text += f"{segment_start} --> {segment_end} \n"
+        trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
+        trans_text += "\n"
+        trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
+        trans_text_to_read += "\n"
 
-    f = open(subtitle_file, "w")
-    f.write(text)
+    original_subtitle_file = f"sub-{input_video_name}-{language}.srt"
+    for index, segment in enumerate(segments):
+        segment_start = format_time(segment.start)
+        segment_end = format_time(segment.end)
+        original_text += f"{str(index+1)} \n"
+        original_text += f"{segment_start} --> {segment_end} \n"
+        original_text += f"{segment.text} \n"
+        original_text += "\n"
+
+    f = open(trans_subtitle_file, "w")
+    f.write(trans_text)
     f.close()
-    t.write(text_to_read)
+    t.write(trans_text_to_read)
     t.close()
+    f = open(original_subtitle_file, "w")
+    f.write(original_text)
+    f.close()
 
-    return subtitle_file
+    #return originL_subtitle_file, trans_subtitle_file
 
 
 def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
@@ -148,10 +151,7 @@ def add_translated_audio_to_video():
     input_video = ffmpeg.input("output-68.mp4", an=None)
     # add translated audio
     input_audio = ffmpeg.input("translated-audio-68.wav").audio
-    (ffmpeg
-    .concat(input_video, input_audio, v=1, a=1)
-    .output("final-68.mp4")
-    .run(overwrite_output=True))
+    ffmpeg.concat(input_video, input_audio, v=1, a=1).output("final-68.mp4").run(overwrite_output=True)
 
 
 def run():
@@ -165,7 +165,7 @@ def run():
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
     add_subtitle_to_video(
         soft_subtitle=True,
-        subtitle_file=subtitle_file,
+        subtitle_file=f"sub-{input_video_name}-{out_lan}.srt",
         subtitle_language=language
     )
     add_translated_audio_to_video()
