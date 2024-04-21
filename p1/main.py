@@ -6,10 +6,11 @@ from pathlib import Path
 from googletrans import Translator
 from gtts import gTTS
 import ffmpeg
+from pydub import AudioSegment
 from scipy.io import wavfile
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
-#load_dotenv()
+# load_dotenv()
 
 translator = Translator()
 
@@ -19,7 +20,7 @@ source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
 
-
+# TODO: tts over subtitles, OpenAI
 prompt = (
     f"This is a podcast audio file that teaches how to use Microsoft Power BI."
     f"It's language is hihly technical,  statistical language,  data language."
@@ -31,12 +32,14 @@ prompt = (
     f"It contains the list of medals earned by each delegation."
 )
 
+
 def clean_audio():
     audio = f"audio-{input_video_name}.wav"
     stream = ffmpeg.input(audio)
     stream = ffmpeg.output(stream, f"clean-audio-{input_video_name}.wav")
     ffmpeg.run(stream, overwrite_output=True)
-    #-af "highpass=f=300,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20,dialoguenhance,lowpass=f=3000"
+    # -af "highpass=f=300,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20,dialoguenhance,lowpass=f=3000"
+
 
 def extract_audio():
     extracted_audio = f"audio-{input_video_name}.wav"
@@ -44,22 +47,26 @@ def extract_audio():
     stream = ffmpeg.output(stream, extracted_audio)
     ffmpeg.run(stream, overwrite_output=True)
 
+
 def transcribe(audio):
     model = WhisperModel('medium')
-    segments, info = model.transcribe(audio, beam_size=5, initial_prompt=prompt)
+    segments, info = model.transcribe(
+        audio, beam_size=5, initial_prompt=prompt)
     language = info[0]
     print("Transcription Language ", info[0], info.language_probability)
     segments = list(segments)
     f = open(f'transcribed-{input_video_name}.txt', 'w')
     for segment in segments:
         # print(segment)
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, translate_text(segment.text, 'es', 'en')))
+        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
+              translate_text(segment.text, 'es', 'en')))
         f.write(str(segment.text))
     return language, segments
 
 
 def translate_text(text, input_lan, out_lan):
-    return translator.translate(text, src=input_lan, dest=out_lan).text
+    return translator.translate(str(text), src=input_lan, dest=out_lan).text
+
 
 def format_time(seconds):
     hours = math.floor(seconds / 3600)
@@ -124,6 +131,7 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
                                vf=f"subtitles={subtitle_file}")
         ffmpeg.run(stream, overwrite_output=True)
 
+
 def read_text(file):
     f = open(file, 'r')
     return str(f.read())
@@ -137,11 +145,14 @@ def text_to_speech(text, language):
 
 def add_translated_audio_to_video():
     # remove original audio
-    stream = ffmpeg.input("output-68.mp4", an=None)
+    input_video = ffmpeg.input("output-68.mp4", an=None)
     # add translated audio
-    trans_audio = ffmpeg.input("translated-audio-68.wav")
-    stream = ffmpeg.output(stream, trans_audio, "final-68.mp4")
-    ffmpeg.run(stream, overwrite_output=True)
+    input_audio = ffmpeg.input("translated-audio-68.wav").audio
+    (ffmpeg
+    .concat(input_video, input_audio, v=1, a=1)
+    .output("final-68.mp4")
+    .run(overwrite_output=True))
+
 
 def run():
     extract_audio()
@@ -149,14 +160,15 @@ def run():
     source_audio = f"clean-audio-{input_video_name}.wav"
     language, segments = transcribe(source_audio)
     subtitle_file = generate_subtitle_file(
-        translated=True, language=language, segments=segments)
-    
+        translated=True, language=language, segments=segments
+    )
+    text_to_speech(f"translated-{input_video_name}.txt", 'en')
     add_subtitle_to_video(
         soft_subtitle=True,
         subtitle_file=subtitle_file,
         subtitle_language=language
     )
-    text_to_speech(f"translated-{input_video_name}.txt", 'en')
     add_translated_audio_to_video()
+
 
 run()
