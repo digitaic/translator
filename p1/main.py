@@ -1,3 +1,5 @@
+# https://www.digitalocean.com/community/tutorials/how-to-generate-and-add-subtitles-to-videos-using-python-openai-whisper-and-ffmpeg 
+
 import time
 import math
 from pathlib import Path
@@ -26,7 +28,7 @@ prompt = (
     f"Teacher is Sonia a female whose native language is spanish from Latin America.  Her talk is highly technical."
     f"This file will be transcribed and translated to multiple languages"
     f"Teacher uses statistical language,  average, mode, mean, max, and many more statistical words and concepts."
-    f"Teacher uses a dataset Athletes Events contains data of Olympic events from 1896 to 2016."
+    f"Teacher uses a dataset that contains data of Olympic events from 1896 to 2016. The file's name is Athletes Events"
     f"It contains data about year of event, country, delegations, athletes ages, athletes height, weight, Body Mass Index BMI."
     f"It contains the list of medals earned by each delegation."
 )
@@ -141,8 +143,13 @@ def read_text(file):
 
 
 def text_to_speech(text, language):
+    # https://github.com/bryan-brancotte/subtitle_to_speech/blob/master/subtitle_to_speech.py
+    # https://github.com/DeeepMaker/subtitle-to-audio/blob/main/subtitle_to_audio.py
+    # https://stackoverflow.com/questions/62554058/subtitles-captions-with-microsoft-azure-speech-to-text-in-python
+    # https://github.com/siinghd/auto-subtitle-tts/blob/main/src/text_to_audio.py
+    # https://github.com/bnsantoso/sub-to-audio
     f = open(text)
-    tts = gTTS(f.read(), lang='en', tld='us')
+    tts = gTTS(f.read(), lang=language, tld='co.uk', lang_check=True)
     tts.save(f"translated-audio-{input_video_name}.wav")
 
 
@@ -163,12 +170,12 @@ def run():
         translated=True, language=language, segments=segments
     )
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
+    """ 
     add_subtitle_to_video(
         soft_subtitle=True,
         subtitle_file=f"sub-{input_video_name}-{out_lan}.srt",
         subtitle_language=language
     )
     add_translated_audio_to_video()
-
-
+    """
 run()
