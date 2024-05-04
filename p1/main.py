@@ -13,7 +13,7 @@ import os
 
 translator = Translator()
 
-input_video = '68.mp4'
+input_video = input("Name of video file to process: ")
 input_video_name, file_ext = os.path.splitext(input_video)
 source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
@@ -30,6 +30,7 @@ prompt = (
     f"It contains data about year of event, country, delegations, athletes ages, athletes height, weight, Body Mass Index BMI."
     f"It contains the list of medals earned by each delegation."
 )
+
 
 def clean_audio():
     audio = f"audio-{input_video_name}.wav"
@@ -113,7 +114,7 @@ def generate_subtitle_file(translated, language, segments):
     f.write(original_text)
     f.close()
 
-    #return originL_subtitle_file, trans_subtitle_file
+    # return originL_subtitle_file, trans_subtitle_file
 
 
 def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
@@ -148,10 +149,16 @@ def text_to_speech(text, language):
 
 def add_translated_audio_to_video():
     # remove original audio
-    input_video = ffmpeg.input("output-68.mp4", an=None)
+    input_video = ffmpeg.input(f"output-{input_video_name}.mp4", an=None)
+
     # add translated audio
-    input_audio = ffmpeg.input("translated-audio-68.wav").audio
-    ffmpeg.concat(input_video, input_audio, v=1, a=1).output("final-68.mp4").run(overwrite_output=True)
+    input_audio = ffmpeg.input(f"translated-audio-{input_video_name}.wav").audio
+    stream = ffmpeg.concat(input_video, input_audio,
+                           v=1, a=1)
+    stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
+    ffmpeg.run(stream, overwrite_output=True)
+
+    # ffmpeg.run(stream, overwrite_output=True)
 
 
 def run():
