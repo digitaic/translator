@@ -48,6 +48,7 @@ def extract_audio():
 
 
 def transcribe(audio):
+    transcribed_text = ""
     model = WhisperModel('medium')
     segments, info = model.transcribe(
         audio, beam_size=5, initial_prompt=prompt)
@@ -56,10 +57,12 @@ def transcribe(audio):
     segments = list(segments)
     f = open(f'transcribed-{input_video_name}.txt', 'w')
     for segment in segments:
-        # print(segment)
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
               translate_text(segment.text, 'es', out_lan)))
-        f.write(str(segment.text))
+        transcribed_text += f"{segment.text}\n"
+    
+    f.write(str(transcribed_text))
+    f.close()
     return language, segments
 
 
@@ -176,6 +179,20 @@ def run():
         subtitle_language=language
     )
     add_translated_audio_to_video()
+"""
+    if os.path.isfile(f"clean-audio-{input_video_name}.wav"):
+        os.remove(f"clean-audio-{input_video_name}.wav")
+    if os.path.isfile(f"audio-{input_video_name}.wav"):
+        os.remove(f"audio-{input_video_name}.wav")
+    if os.path.isfile(f"output-{input_video_name}.mp4"):
+        os.remove(f"output-{input_video_name}.mp4")
+    if os.path.isfile(f"transcribed-{input_video_name}.txt"):
+        os.remove(f"transcribed-{input_video_name}.txt")
+    if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
+        os.remove(f"translated-audio-{input_video_name}.wav")
+    if os.path.isfile(f"translated-{input_video_name}.txt"):
+        os.remove(f"translated-{input_video_name}.txt")
+"""
 
 
 run()
