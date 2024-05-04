@@ -22,6 +22,8 @@ out_lan = 'en'
 # TODO: tts over subtitles, OpenAI
 prompt = (
     f"This is a podcast audio file that teaches how to use Microsoft Power BI."
+    f"It was created in native spanish from latin america."
+    f"Uses technical langauge related to statistics and data science.  Common words are Average, Median, Mode, Standard Deviation."
     f"It's language is hihly technical,  statistical language,  data language."
     f"Teacher is Sonia a female whose native language is spanish from Latin America.  Her talk is highly technical."
     f"This file will be transcribed and translated to multiple languages"
@@ -193,6 +195,5 @@ def run():
     if os.path.isfile(f"translated-{input_video_name}.txt"):
         os.remove(f"translated-{input_video_name}.txt")
 """
-
 
 run()
