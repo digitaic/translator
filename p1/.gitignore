@@ -1,2 +1,7 @@
 .env
+source/
+process/
+clean/
+src
+
 

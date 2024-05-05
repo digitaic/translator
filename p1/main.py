@@ -69,7 +69,7 @@ def transcribe(audio):
 
 
 def translate_text(text, input_lan, out_lan):
-    return translator.translate(str(text), src=input_lan, dest=out_lan).text
+    return translator.translate(str(text), src=str(input_lan), dest=out_lan).text
 
 
 def format_time(seconds):
@@ -84,20 +84,23 @@ def format_time(seconds):
 
 
 def generate_subtitle_file(translated, language, segments):
-    t = open(f"translated-{input_video_name}.txt", "a")
     trans_text = ""
     original_text = ""
     trans_text_to_read = ""
     text_to_read = ""
+    duration = 0
 
+        #if index < len(segments):
     trans_subtitle_file = f"sub-{input_video_name}-{out_lan}.srt"
-    for index, segment in enumerate(segments):
+    for index, segment in enumerate(segments, start=0):
         segment_start = format_time(segment.start)
         segment_end = format_time(segment.end)
         trans_text += f"{str(index+1)} \n"
         trans_text += f"{segment_start} --> {segment_end} \n"
         trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
         trans_text += "\n"
+        duration = segment.end - segment.start
+        trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
         trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
         trans_text_to_read += "\n"
 
@@ -113,11 +116,12 @@ def generate_subtitle_file(translated, language, segments):
     f = open(trans_subtitle_file, "w")
     f.write(trans_text)
     f.close()
+    t = open(f"translated-{input_video_name}.txt", "w")
     t.write(trans_text_to_read)
     t.close()
-    f = open(original_subtitle_file, "w")
-    f.write(original_text)
-    f.close()
+    g = open(original_subtitle_file, "w")
+    g.write(original_text)
+    g.close()
 
     # return originL_subtitle_file, trans_subtitle_file
 
@@ -174,6 +178,7 @@ def run():
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
+"""
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
     add_subtitle_to_video(
         soft_subtitle=True,
@@ -181,7 +186,6 @@ def run():
         subtitle_language=language
     )
     add_translated_audio_to_video()
-"""
     if os.path.isfile(f"clean-audio-{input_video_name}.wav"):
         os.remove(f"clean-audio-{input_video_name}.wav")
     if os.path.isfile(f"audio-{input_video_name}.wav"):

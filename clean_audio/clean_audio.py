@@ -23,7 +23,7 @@ def clean_audio():
     stream = ffmpeg.input(audio).filter(audio, -af "highpass=f=300,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20,dialoguenhance,lowpass=f=3000")
     stream = ffmpeg.output(stream, f"clean-audio-{input_video_name}.wav")
     ffmpeg.run(stream, overwrite_output=True)
-    # iffmpeg -i <file> -af "highpass=f=300,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20,dialoguenhance,lowpass=f=3000"
+    # ffmpeg -i audio-68-raw.wav  -af "highpass=f=300,lowpass=f=3000, dialoguenhance,asendcmd=0.0 afftdn sn start,asendcmd=1.5 afftdn sn stop,afftdn=nf=-20"
 # https://superuser.com/questions/733061/reduce-background-noise-and-optimize-the-speech-from-an-audio-clip-using-ffmpeg
 
 def extract_audio():
