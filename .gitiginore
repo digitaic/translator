@@ -1,2 +1,7 @@
 .env
 old/
+
+*.wav
+*.mp4
+*.avi
+*.mkv
