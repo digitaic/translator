@@ -7,8 +7,8 @@ from googletrans import Translator
 from gtts import gTTS
 import ffmpeg
 from scipy.io import wavfile
-# from dotenv import load_dotenv
 import os
+# from dotenv import load_dotenv
 # load_dotenv()
 
 translator = Translator()
@@ -178,7 +178,6 @@ def run():
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
-"""
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
     add_subtitle_to_video(
         soft_subtitle=True,
@@ -186,6 +185,7 @@ def run():
         subtitle_language=language
     )
     add_translated_audio_to_video()
+
     if os.path.isfile(f"clean-audio-{input_video_name}.wav"):
         os.remove(f"clean-audio-{input_video_name}.wav")
     if os.path.isfile(f"audio-{input_video_name}.wav"):
@@ -196,8 +196,5 @@ def run():
         os.remove(f"transcribed-{input_video_name}.txt")
     if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
         os.remove(f"translated-audio-{input_video_name}.wav")
-    if os.path.isfile(f"translated-{input_video_name}.txt"):
-        os.remove(f"translated-{input_video_name}.txt")
-"""
 
 run()
