@@ -1,0 +1,58 @@
+Hello, now we are going to learn to create new measures with the function X. 
+
+and avengex, max and maxx, Mean and Meanx. The difference between average and average is that average calculates 
+
+The average of a specific column in the entire table, while avegex calculates the 
+
+average of a personalized expression evaluated by row in a table and then takes the average 
+
+of those results.A personalized expression is a formula written in Dax.A measure is 
+
+A personalized expression.To understand the difference well, let's see an example. Let's create the 
+
+New AGEGEGE AGEGE in the Olympic Events table.We click on New Measure and we put 
+
+name to the measure that we said is Age average and this will be equal to average, here is, of the 
+
+values that are in each row for the different Games, that is, for each of the games 
+
+Olympic, so that means the values of Games, we close parentheses, coma and let's 
+
+Calculate, calculate for each of those games the average of the age colon 
+
+and we close parentheses and enter. 
+
+Here we have our Age Avenge measure.Avegex allows us to get the average of 
+
+the column but taking into account blocks of rows, in this case the Olympic Games, 
+
+That is, the different Olympics.In the visualization module we will open a page, 
+
+We are going to call it X and we will create a matrix and place Games in Rows and the new measure in Values, 
+
+Age average in Values. 
+
+And so we can see the average age in each of the Olympics and the average age in 
+
+All games that have been 25.8 years.Let's see the difference with average, we are going to 
+
+Transform Data, that is, in Power Query and we are going to select our Olimpic Events dataset 
+
+And we are going to click on the header of the AGE variable, we verify that the type of 
+
+Data is an integer, indeed has the Whole Number icon and we are going to locate the 
+
+Number module column at the top.Being in transform and here is Number column and we are going 
+
+to click on the statistical functions to locate average.Power Query shows us the 
+
+Result, this is the average age of all athletes who have competed in all Olympics 
+
+From history until 2016, but with average we cannot know the average age for each 
+
+of the Olympic Games, as we see the value is different because this is an average of all 
+
+The Age column numbers, with average X the average age of the age averages of 
+
+Each Olympiad.In the next class we will see the Rank X function, see you. 
+

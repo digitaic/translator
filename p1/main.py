@@ -7,6 +7,9 @@ from googletrans import Translator
 from gtts import gTTS
 import ffmpeg
 from scipy.io import wavfile
+from aeneas.executetask import ExecuteTask
+from aeneas.task import Task
+
 import os
 # from dotenv import load_dotenv
 # load_dotenv()
@@ -31,6 +34,9 @@ prompt = (
     f"Teacher uses a dataset Athletes Events contains data of Olympic events from 1896 to 2016."
     f"It contains data about year of event, country, delegations, athletes ages, athletes height, weight, Body Mass Index BMI."
     f"It contains the list of medals earned by each delegation."
+    f"Este es un podcast en lenguaje Español Latino que enseña o instruye sobre el uso de Microsoft PowerBI"
+    f"El texto es tecnico.  Habla sore estadistica, datos, medidas, series de tiempo, calculos, columnas, filas, tablas."
+    f"Usa un dataset o fuente de datos que contiene data de todas las Olimpiadas:  pais,  equipo, medallas, genero, edad.  Usa palabras como atleta, equipo, muestra, polacion, moda, promedio, average, desviacion estandar."
 )
 
 
@@ -61,8 +67,8 @@ def transcribe(audio):
     for segment in segments:
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
               translate_text(segment.text, 'es', out_lan)))
-        transcribed_text += f"{segment.text}\n"
-    
+        transcribed_text += f"{segment.text}\n\n"
+
     f.write(str(transcribed_text))
     f.close()
     return language, segments
@@ -90,7 +96,7 @@ def generate_subtitle_file(translated, language, segments):
     text_to_read = ""
     duration = 0
 
-        #if index < len(segments):
+    # if index < len(segments):
     trans_subtitle_file = f"sub-{input_video_name}-{out_lan}.srt"
     for index, segment in enumerate(segments, start=0):
         segment_start = format_time(segment.start)
@@ -100,7 +106,7 @@ def generate_subtitle_file(translated, language, segments):
         trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
         trans_text += "\n"
         duration = segment.end - segment.start
-        trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
+        # trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
         trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
         trans_text_to_read += "\n"
 
@@ -145,6 +151,11 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
         ffmpeg.run(stream, overwrite_output=True)
 
 
+def force_alignment(text, audiuo):
+    string = "task_language=es|is_text_type=subtitles|os_task_file_format=srt"
+    return 1
+
+
 def read_text(file):
     f = open(file, 'r')
     return str(f.read())
@@ -161,7 +172,8 @@ def add_translated_audio_to_video():
     input_video = ffmpeg.input(f"output-{input_video_name}.mp4", an=None)
 
     # add translated audio
-    input_audio = ffmpeg.input(f"translated-audio-{input_video_name}.wav").audio
+    input_audio = ffmpeg.input(
+        f"translated-audio-{input_video_name}.wav").audio
     stream = ffmpeg.concat(input_video, input_audio,
                            v=1, a=1)
     stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
@@ -179,12 +191,14 @@ def run():
         translated=True, language=language, segments=segments
     )
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
+
+    """
+
     add_subtitle_to_video(
         soft_subtitle=True,
         subtitle_file=f"sub-{input_video_name}-{out_lan}.srt",
         subtitle_language=language
     )
-    add_translated_audio_to_video()
 
     if os.path.isfile(f"clean-audio-{input_video_name}.wav"):
         os.remove(f"clean-audio-{input_video_name}.wav")
@@ -194,7 +208,13 @@ def run():
         os.remove(f"output-{input_video_name}.mp4")
     if os.path.isfile(f"transcribed-{input_video_name}.txt"):
         os.remove(f"transcribed-{input_video_name}.txt")
+
+    add_translated_audio_to_video()
+
     if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
         os.remove(f"translated-audio-{input_video_name}.wav")
+
+    """
+
 
 run()
