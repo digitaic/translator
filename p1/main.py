@@ -64,7 +64,8 @@ def transcribe_audio(audio):
         transcribed_text = ""
         model = WhisperModel('large')
         segments, info = model.transcribe(
-            audio, beam_size=5, initial_prompt=prompt)
+            audio, beam_size=5, initial_prompt=prompt, word_timestamps=True
+        )
         language = info[0]
         print("Transcription Language ", info[0], info.language_probability)
         segments = list(segments)
@@ -83,7 +84,7 @@ def transcribe_audio(audio):
 
 
 def translate_text(text, input_lan, out_lan):
-    try;
+    try:
         return translator.translate(str(text), src=str(input_lan), dest=out_lan).text
     except Exception as e:
         print(f"[Line 87] Error translating text: {e}.")
@@ -163,12 +164,12 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
             stream = ffmpeg.output(
                 video_input_stream, subtitle_input_stream, output_video, **{"c": "copy", "c:s": "mov_text"},
                 **{"metadata:s:s:0": f"language={subtitle_language}",
-                "metadata:s:s:0": f"title={subtitle_track_title}"}
+                   "metadata:s:s:0": f"title={subtitle_track_title}"}
             )
             ffmpeg.run(stream, overwrite_output=True)
         else:
             stream = ffmpeg.output(video_input_stream, output_video,
-                                vf=f"subtitles={subtitle_file}")
+                                   vf=f"subtitles={subtitle_file}")
             ffmpeg.run(stream, overwrite_output=True)
     except Exception as e:
         print(f"[Line 156] Error add subtitle to video: {e}.")
@@ -208,7 +209,7 @@ def add_translated_audio_to_video():
         input_audio = ffmpeg.input(
             f"translated-audio-{input_video_name}.wav").audio
         stream = ffmpeg.concat(input_video, input_audio,
-                            v=1, a=1)
+                               v=1, a=1)
         stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
         ffmpeg.run(stream, overwrite_output=True)
     except Exception as e:
@@ -221,12 +222,12 @@ def run():
     clean_audio()
     source_audio = f"clean-audio-{input_video_name}.wav"
     language, segments = transcribe_audio(source_audio)
+    """
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
 
-    """
 
     add_subtitle_to_video(
         soft_subtitle=True,
@@ -249,5 +250,6 @@ def run():
         os.remove(f"translated-audio-{input_video_name}.wav")
 
     """
+
 
 run()
