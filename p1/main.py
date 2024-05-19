@@ -21,6 +21,7 @@ input_video_name, file_ext = os.path.splitext(input_video)
 source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
+model_size="large"
 
 # TODO: tts over subtitles, OpenAI
 prompt = (
@@ -61,22 +62,27 @@ def extract_audio():
 
 def transcribe_audio(audio):
     try:
+        transcribed_words = ""
         transcribed_text = ""
-        model = WhisperModel('large')
+        model = WhisperModel(model_size, device="cpu", compute_type="int8")
         segments, info = model.transcribe(
-            audio, beam_size=5, initial_prompt=prompt, word_timestamps=True
+            audio, beam_size=5, language="es", initial_prompt=prompt, word_timestamps=True
         )
         language = info[0]
         print("Transcription Language ", info[0], info.language_probability)
         segments = list(segments)
-        f = open(f'transcribed-{input_video_name}.txt', 'w')
         for segment in segments:
-            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
-                                           translate_text(segment.text, 'es', out_lan)))
             transcribed_text += f"{segment.text}\n\n"
-
+            for word in segment.words:
+                print("[%.2fs -> %.2fs] %s" % (word.start, word.end, word.word)),
+                transcribed_words += f"{word.word}\n"
+        f = open(f'transcribed-{input_video_name}.txt', 'w')
         f.write(str(transcribed_text))
         f.close()
+        w = open(f'transcribed-words-{input_video_name}.txt', 'w')
+        w.write(str(transcribed_words))
+        w.close()
+
         return language, segments
     except Exception as e:
         print(f"[Line 62] Error transcribing audio: {e}.")
