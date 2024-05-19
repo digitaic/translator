@@ -49,44 +49,60 @@ def clean_audio():
 
 
 def extract_audio():
-    extracted_audio = f"audio-{input_video_name}.wav"
-    stream = ffmpeg.input(input_video)
-    stream = ffmpeg.output(stream, extracted_audio)
-    ffmpeg.run(stream, overwrite_output=True)
+    try:
+        extracted_audio = f"audio-{input_video_name}.wav"
+        stream = ffmpeg.input(input_video)
+        stream = ffmpeg.output(stream, extracted_audio)
+        ffmpeg.run(stream, overwrite_output=True)
+    except Exception as e:
+        print(f"[Line 51] Error extracting audio from video: {e}.")
+        return None
 
 
-def transcribe(audio):
-    transcribed_text = ""
-    model = WhisperModel('medium')
-    segments, info = model.transcribe(
-        audio, beam_size=5, initial_prompt=prompt)
-    language = info[0]
-    print("Transcription Language ", info[0], info.language_probability)
-    segments = list(segments)
-    f = open(f'transcribed-{input_video_name}.txt', 'w')
-    for segment in segments:
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
-              translate_text(segment.text, 'es', out_lan)))
-        transcribed_text += f"{segment.text}\n\n"
+def transcribe_audio(audio):
+    try:
+        transcribed_text = ""
+        model = WhisperModel('large')
+        segments, info = model.transcribe(
+            audio, beam_size=5, initial_prompt=prompt)
+        language = info[0]
+        print("Transcription Language ", info[0], info.language_probability)
+        segments = list(segments)
+        f = open(f'transcribed-{input_video_name}.txt', 'w')
+        for segment in segments:
+            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end,
+                                           translate_text(segment.text, 'es', out_lan)))
+            transcribed_text += f"{segment.text}\n\n"
 
-    f.write(str(transcribed_text))
-    f.close()
-    return language, segments
+        f.write(str(transcribed_text))
+        f.close()
+        return language, segments
+    except Exception as e:
+        print(f"[Line 62] Error transcribing audio: {e}.")
+        return None
 
 
 def translate_text(text, input_lan, out_lan):
-    return translator.translate(str(text), src=str(input_lan), dest=out_lan).text
+    try;
+        return translator.translate(str(text), src=str(input_lan), dest=out_lan).text
+    except Exception as e:
+        print(f"[Line 87] Error translating text: {e}.")
+        return None
 
 
 def format_time(seconds):
-    hours = math.floor(seconds / 3600)
-    seconds %= 3600
-    minutes = math.floor(seconds / 60)
-    seconds %= 60
-    milliseconds = round((seconds - math.floor(seconds)) * 1000)
-    seconds = math.floor(seconds)
-    formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}"
-    return formatted_time
+    try:
+        hours = math.floor(seconds / 3600)
+        seconds %= 3600
+        minutes = math.floor(seconds / 60)
+        seconds %= 60
+        milliseconds = round((seconds - math.floor(seconds)) * 1000)
+        seconds = math.floor(seconds)
+        formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}"
+        return formatted_time
+    except Exception as e:
+        print(f"[Line 94] Error time format: {e}.")
+        return None
 
 
 def generate_subtitle_file(translated, language, segments):
@@ -96,38 +112,42 @@ def generate_subtitle_file(translated, language, segments):
     text_to_read = ""
     duration = 0
 
-    # if index < len(segments):
-    trans_subtitle_file = f"sub-{input_video_name}-{out_lan}.srt"
-    for index, segment in enumerate(segments, start=0):
-        segment_start = format_time(segment.start)
-        segment_end = format_time(segment.end)
-        trans_text += f"{str(index+1)} \n"
-        trans_text += f"{segment_start} --> {segment_end} \n"
-        trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
-        trans_text += "\n"
-        duration = segment.end - segment.start
-        # trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
-        trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
-        trans_text_to_read += "\n"
+    try:
+        # if index < len(segments):
+        trans_subtitle_file = f"sub-{input_video_name}-{out_lan}.srt"
+        for index, segment in enumerate(segments, start=0):
+            segment_start = format_time(segment.start)
+            segment_end = format_time(segment.end)
+            trans_text += f"{str(index+1)} \n"
+            trans_text += f"{segment_start} --> {segment_end} \n"
+            trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
+            trans_text += "\n"
+            duration = segment.end - segment.start
+            # trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
+            trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
+            trans_text_to_read += "\n"
 
-    original_subtitle_file = f"sub-{input_video_name}-{language}.srt"
-    for index, segment in enumerate(segments):
-        segment_start = format_time(segment.start)
-        segment_end = format_time(segment.end)
-        original_text += f"{str(index+1)} \n"
-        original_text += f"{segment_start} --> {segment_end} \n"
-        original_text += f"{segment.text} \n"
-        original_text += "\n"
+        original_subtitle_file = f"sub-{input_video_name}-{language}.srt"
+        for index, segment in enumerate(segments):
+            segment_start = format_time(segment.start)
+            segment_end = format_time(segment.end)
+            original_text += f"{str(index+1)} \n"
+            original_text += f"{segment_start} --> {segment_end} \n"
+            original_text += f"{segment.text} \n"
+            original_text += "\n"
 
-    f = open(trans_subtitle_file, "w")
-    f.write(trans_text)
-    f.close()
-    t = open(f"translated-{input_video_name}.txt", "w")
-    t.write(trans_text_to_read)
-    t.close()
-    g = open(original_subtitle_file, "w")
-    g.write(original_text)
-    g.close()
+        f = open(trans_subtitle_file, "w")
+        f.write(trans_text)
+        f.close()
+        t = open(f"translated-{input_video_name}.txt", "w")
+        t.write(trans_text_to_read)
+        t.close()
+        g = open(original_subtitle_file, "w")
+        g.write(original_text)
+        g.close()
+    except Exception as e:
+        print(f"[Line 149] Error generate subtitle file: {e}.")
+        return None
 
     # return originL_subtitle_file, trans_subtitle_file
 
@@ -138,17 +158,21 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
     output_video = f"output-{input_video_name}.mp4"
     subtitle_track_title = subtitle_file.replace(".srt", "")
 
-    if soft_subtitle:
-        stream = ffmpeg.output(
-            video_input_stream, subtitle_input_stream, output_video, **{"c": "copy", "c:s": "mov_text"},
-            **{"metadata:s:s:0": f"language={subtitle_language}",
-               "metadata:s:s:0": f"title={subtitle_track_title}"}
-        )
-        ffmpeg.run(stream, overwrite_output=True)
-    else:
-        stream = ffmpeg.output(video_input_stream, output_video,
-                               vf=f"subtitles={subtitle_file}")
-        ffmpeg.run(stream, overwrite_output=True)
+    try:
+        if soft_subtitle:
+            stream = ffmpeg.output(
+                video_input_stream, subtitle_input_stream, output_video, **{"c": "copy", "c:s": "mov_text"},
+                **{"metadata:s:s:0": f"language={subtitle_language}",
+                "metadata:s:s:0": f"title={subtitle_track_title}"}
+            )
+            ffmpeg.run(stream, overwrite_output=True)
+        else:
+            stream = ffmpeg.output(video_input_stream, output_video,
+                                vf=f"subtitles={subtitle_file}")
+            ffmpeg.run(stream, overwrite_output=True)
+    except Exception as e:
+        print(f"[Line 156] Error add subtitle to video: {e}.")
+        return None
 
 
 def force_alignment(text, audiuo):
@@ -157,36 +181,46 @@ def force_alignment(text, audiuo):
 
 
 def read_text(file):
-    f = open(file, 'r')
-    return str(f.read())
+    try:
+        f = open(file, 'r')
+        return str(f.read())
+    except Exception as e:
+        print(f"[Line 184] Error read text: {e}.")
+        return None
 
 
 def text_to_speech(text, language):
-    f = open(text)
-    tts = gTTS(f.read(), lang='en', tld='us')
-    tts.save(f"translated-audio-{input_video_name}.wav")
+    try:
+        f = open(text)
+        tts = gTTS(f.read(), lang='en', tld='us')
+        tts.save(f"translated-audio-{input_video_name}.wav")
+    except Exception as e:
+        print(f"[Line 193] Error text to speech: {e}.")
+        return None
 
 
 def add_translated_audio_to_video():
-    # remove original audio
-    input_video = ffmpeg.input(f"output-{input_video_name}.mp4", an=None)
+    try:
+        # remove original audio
+        input_video = ffmpeg.input(f"output-{input_video_name}.mp4", an=None)
 
-    # add translated audio
-    input_audio = ffmpeg.input(
-        f"translated-audio-{input_video_name}.wav").audio
-    stream = ffmpeg.concat(input_video, input_audio,
-                           v=1, a=1)
-    stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
-    ffmpeg.run(stream, overwrite_output=True)
-
-    # ffmpeg.run(stream, overwrite_output=True)
+        # add translated audio
+        input_audio = ffmpeg.input(
+            f"translated-audio-{input_video_name}.wav").audio
+        stream = ffmpeg.concat(input_video, input_audio,
+                            v=1, a=1)
+        stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
+        ffmpeg.run(stream, overwrite_output=True)
+    except Exception as e:
+        print(f"[Line 203] Error add translared audio to video: {e}.")
+        return None
 
 
 def run():
     extract_audio()
     clean_audio()
     source_audio = f"clean-audio-{input_video_name}.wav"
-    language, segments = transcribe(source_audio)
+    language, segments = transcribe_audio(source_audio)
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
@@ -215,6 +249,5 @@ def run():
         os.remove(f"translated-audio-{input_video_name}.wav")
 
     """
-
 
 run()
