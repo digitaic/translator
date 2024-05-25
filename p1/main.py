@@ -21,7 +21,7 @@ input_video_name, file_ext = os.path.splitext(input_video)
 source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
-model_size="large"
+model_size="medium"
 
 # TODO: tts over subtitles, OpenAI
 prompt = (
@@ -38,6 +38,7 @@ prompt = (
     f"Este es un podcast en lenguaje Español Latino que enseña o instruye sobre el uso de Microsoft PowerBI"
     f"El texto es tecnico.  Habla sore estadistica, datos, medidas, series de tiempo, calculos, columnas, filas, tablas."
     f"Usa un dataset o fuente de datos que contiene data de todas las Olimpiadas:  pais,  equipo, medallas, genero, edad.  Usa palabras como atleta, equipo, muestra, polacion, moda, promedio, average, desviacion estandar."
+    f"common words: average x, sum x, "
 )
 
 
@@ -66,7 +67,7 @@ def transcribe_audio(audio):
         transcribed_text = ""
         model = WhisperModel(model_size, device="cpu", compute_type="int8")
         segments, info = model.transcribe(
-            audio, beam_size=5, language="es", initial_prompt=prompt, word_timestamps=True
+            audio, beam_size=5, language="es", verbose=True, initial_prompt=prompt, word_timestamps=True
         )
         language = info[0]
         print("Transcription Language ", info[0], info.language_probability)
