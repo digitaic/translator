@@ -8,12 +8,14 @@ from gtts import gTTS
 import ffmpeg
 from scipy.io import wavfile
 from aeneas.executetask import ExecuteTask
+import pydub
 from aeneas.task import Task
 
 import os
 # from dotenv import load_dotenv
 # load_dotenv()
 
+#translator = Translator(service_urls=['translate.googleapis.com'])
 translator = Translator()
 
 input_video = input("Name of video file to process: ")
@@ -51,14 +53,24 @@ def clean_audio():
 
 
 def extract_audio():
+    # ffmpeg -i 1.mp4 -acodec pcm_s16le -f s16le -ac 1 -ar 16000 -f wav audio.wav
+    extracted_audio = f"audio-{input_video_name}.wav"
+    print("jea 57")
     try:
-        extracted_audio = f"audio-{input_video_name}.wav"
-        stream = ffmpeg.input(input_video)
-        stream = ffmpeg.output(stream, extracted_audio)
-        ffmpeg.run(stream, overwrite_output=True)
-    except Exception as e:
-        print(f"[Line 51] Error extracting audio from video: {e}.")
+        input = ffmpeg.input(input_video)
+        audio = input.audio
+        audio = ffmpeg.output(audio, extracted_audio)
+        ffmpeg.run(audio, overwrite_output=True)
+        #.output('-', format='s16le', acodec='pcm_s16le', ac=1, ar='16k' )
+        # **{'acodec:pcm'}
+    except ffmpeg.Error as e:
+        print(f"[Line 54] Error extracting audio from video: {e.stderr}.")
         return None
+
+
+def split_audio():
+    pydub.silence.detect_nonsilent(normalized_sound, min_silence_len=min_slient, silence_tresh=-20.0 -thd, seek_step=1)
+    return 1
 
 
 def transcribe_audio(audio):
@@ -67,7 +79,7 @@ def transcribe_audio(audio):
         transcribed_text = ""
         model = WhisperModel(model_size, device="cpu", compute_type="int8")
         segments, info = model.transcribe(
-            audio, beam_size=5, language="es", verbose=True, initial_prompt=prompt, word_timestamps=True
+            audio, beam_size=5, language="es", initial_prompt=prompt, word_timestamps=True
         )
         language = info[0]
         print("Transcription Language ", info[0], info.language_probability)
@@ -226,15 +238,15 @@ def add_translated_audio_to_video():
 
 def run():
     extract_audio()
+    # split_audio()
     clean_audio()
     source_audio = f"clean-audio-{input_video_name}.wav"
     language, segments = transcribe_audio(source_audio)
-    """
+    
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
     text_to_speech(f"translated-{input_video_name}.txt", 'en')
-
 
     add_subtitle_to_video(
         soft_subtitle=True,
@@ -255,8 +267,5 @@ def run():
 
     if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
         os.remove(f"translated-audio-{input_video_name}.wav")
-
-    """
-
 
 run()
