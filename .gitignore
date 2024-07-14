@@ -5,3 +5,9 @@ old/
 .mp4
 .avi
 .mkv
+
+lib/
+build/
+dist/
+venv/
+

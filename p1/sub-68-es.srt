@@ -1,0 +1,136 @@
+1 
+00:00:0,000 --> 00:00:7,880 
+ Hola, ahora vamos a aprender a crear nuevas medidas con la función x. Hay sum y sum 
+
+2 
+00:00:7,880 --> 00:00:17,440 
+ x, average y average x, max y max x, mean y mean x. La diferencia entre average y 
+
+3 
+00:00:17,440 --> 00:00:25,000 
+ average x es que average calcula el promedio de una columna especifica en toda la tabla, 
+
+4 
+00:00:25,000 --> 00:00:32,080 
+ mientras que average x calcula el promedio de una expresión personalizada evaluada 
+
+5 
+00:00:32,080 --> 00:00:38,900 
+ fila por fila en una tabla y luego toma el promedio de esos resultados. Una expresión 
+
+6 
+00:00:38,900 --> 00:00:44,780 
+ personalizada es una fórmula escrita en DAX. Una medida es una expresión personalizada. 
+
+7 
+00:00:45,220 --> 00:00:51,020 
+ Para comprender bien la diferencia, veamos un ejemplo. Vamos a crear la nueva medida 
+
+8 
+00:00:51,020 --> 00:00:58,300 
+ age average en la tabla de Olympic Events. Hacemos click en new measure y le ponemos nombre 
+
+9 
+00:00:58,300 --> 00:01:8,900 
+ a la medida que dijimos que es age average y esta será igual a average x, aquí está, 
+
+10 
+00:01:10,000 --> 00:01:15,020 
+ de los valores que están en cada fila para los diferentes games, es decir, 
+
+11 
+00:01:15,020 --> 00:01:23,820 
+ para cada uno de los juegos olímpicos. Entonces, eso significa los valores de games, 
+
+12 
+00:01:26,840 --> 00:01:36,120 
+ cerramos paréntesis, coma y vamos a calcular, calculate para cada uno de 
+
+13 
+00:01:36,120 --> 00:01:40,340 
+ esos juegos el promedio de la columna edad. 
+
+14 
+00:01:46,240 --> 00:01:50,220 
+ Y cerramos paréntesis y enter. 
+
+15 
+00:01:53,480 --> 00:02:1,160 
+ Acá tenemos nuestra medida age average. Average x nos permite sacar el promedio 
+
+16 
+00:02:1,160 --> 00:02:6,000 
+ de la columna pero teniendo en cuenta bloques de filas, en este caso los 
+
+17 
+00:02:6,000 --> 00:02:12,080 
+ juegos olímpicos, es decir, las diferentes olimpiadas. En el módulo de visualización, 
+
+18 
+00:02:12,080 --> 00:02:17,540 
+ vamos a abrir una página, la vamos a llamar x 
+
+19 
+00:02:18,840 --> 00:02:23,880 
+ y vamos a crear una matriz y ubicamos games en rows 
+
+20 
+00:02:26,400 --> 00:02:33,240 
+ y la nueva medida en values, age average en values. 
+
+21 
+00:02:35,020 --> 00:02:42,460 
+ Y así podremos ver el promedio de edad en cada una de las olimpiadas y el promedio 
+
+22 
+00:02:42,460 --> 00:02:49,800 
+ de edad en todos los juegos que ha sido 25.8 años. Veamos la diferencia con average, 
+
+23 
+00:02:50,320 --> 00:02:59,300 
+ nos vamos a ir a transform data, es decir, en Power Query y vamos a seleccionar nuestro 
+
+24 
+00:02:59,300 --> 00:03:6,620 
+ dataset de Olympic Events y vamos a hacer clic en el header de la variable age, 
+
+25 
+00:03:7,940 --> 00:03:12,000 
+ verificamos que el tipo de datos sea un número entero, efectivamente tiene el 
+
+26 
+00:03:12,000 --> 00:03:18,980 
+ ícono de whole number y vamos a ubicar el módulo number column en la parte superior, 
+
+27 
+00:03:19,960 --> 00:03:26,940 
+ estando en transform y acá está number column y vamos a hacer clic en las funciones 
+
+28 
+00:03:26,940 --> 00:03:36,980 
+ estadísticas para ubicar average. Power Query nos muestra el resultado, 
+
+29 
+00:03:37,460 --> 00:03:43,500 
+ este es el promedio de edad de todos los atletas que han competido en todos los 
+
+30 
+00:03:43,500 --> 00:03:49,560 
+ olímpicos de la historia hasta el 2016, pero con average no podemos saber el promedio 
+
+31 
+00:03:49,560 --> 00:03:55,980 
+ de edad para cada uno de los juegos olímpicos, como vemos el valor es diferente porque este 
+
+32 
+00:03:55,980 --> 00:04:2,580 
+ es un solo promedio de todos los números de la columna age, con average x se calcula 
+
+33 
+00:04:2,580 --> 00:04:8,360 
+ el promedio de los promedios de edad de cada olimpiado. En la próxima clase veremos la 
+
+34 
+00:04:8,360 --> 00:04:11,380 
+ función rank x, nos vemos. 
+

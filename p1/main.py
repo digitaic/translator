@@ -1,21 +1,21 @@
+from pathlib import Path
 import time
 import math
 from pathlib import Path
-from faster_whisper import WhisperModel
-from pathlib import Path
-from googletrans import Translator
-from gtts import gTTS
 import ffmpeg
+from faster_whisper import WhisperModel
+from googletrans import Translator
 from scipy.io import wavfile
-from aeneas.executetask import ExecuteTask
+# from aeneas.executetask import ExecuteTask
 import pydub
-from aeneas.task import Task
+# from aeneas.task import Task
+from gtts import gTTS
 
 import os
 # from dotenv import load_dotenv
 # load_dotenv()
 
-#translator = Translator(service_urls=['translate.googleapis.com'])
+# translator = Translator(service_urls=['translate.googleapis.com'])
 translator = Translator()
 
 input_video = input("Name of video file to process: ")
@@ -23,7 +23,7 @@ input_video_name, file_ext = os.path.splitext(input_video)
 source_location = 'source/video/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
-model_size="medium"
+model_size = "medium"
 
 # TODO: tts over subtitles, OpenAI
 prompt = (
@@ -61,7 +61,7 @@ def extract_audio():
         audio = input.audio
         audio = ffmpeg.output(audio, extracted_audio)
         ffmpeg.run(audio, overwrite_output=True)
-        #.output('-', format='s16le', acodec='pcm_s16le', ac=1, ar='16k' )
+        # .output('-', format='s16le', acodec='pcm_s16le', ac=1, ar='16k' )
         # **{'acodec:pcm'}
     except ffmpeg.Error as e:
         print(f"[Line 54] Error extracting audio from video: {e.stderr}.")
@@ -69,7 +69,8 @@ def extract_audio():
 
 
 def split_audio():
-    pydub.silence.detect_nonsilent(normalized_sound, min_silence_len=min_slient, silence_tresh=-20.0 -thd, seek_step=1)
+    pydub.silence.detect_nonsilent(
+        normalized_sound, min_silence_len=min_slient, silence_tresh=-20.0 - thd, seek_step=1)
     return 1
 
 
@@ -87,7 +88,8 @@ def transcribe_audio(audio):
         for segment in segments:
             transcribed_text += f"{segment.text}\n\n"
             for word in segment.words:
-                print("[%.2fs -> %.2fs] %s" % (word.start, word.end, word.word)),
+                print("[%.2fs -> %.2fs] %s" %
+                      (word.start, word.end, word.word)),
                 transcribed_words += f"{word.word}\n"
         f = open(f'transcribed-{input_video_name}.txt', 'w')
         f.write(str(transcribed_text))
@@ -242,7 +244,7 @@ def run():
     clean_audio()
     source_audio = f"clean-audio-{input_video_name}.wav"
     language, segments = transcribe_audio(source_audio)
-    
+
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
@@ -254,18 +256,18 @@ def run():
         subtitle_language=language
     )
 
+    add_translated_audio_to_video()
+
     if os.path.isfile(f"clean-audio-{input_video_name}.wav"):
         os.remove(f"clean-audio-{input_video_name}.wav")
     if os.path.isfile(f"audio-{input_video_name}.wav"):
         os.remove(f"audio-{input_video_name}.wav")
-    if os.path.isfile(f"output-{input_video_name}.mp4"):
-        os.remove(f"output-{input_video_name}.mp4")
     if os.path.isfile(f"transcribed-{input_video_name}.txt"):
         os.remove(f"transcribed-{input_video_name}.txt")
-
-    add_translated_audio_to_video()
-
+    if os.path.isfile(f"output-{input_video_name}.mp4"):
+        os.remove(f"output-{input_video_name}.mp4")
     if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
         os.remove(f"translated-audio-{input_video_name}.wav")
+
 
 run()
