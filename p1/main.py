@@ -7,14 +7,10 @@ import ffmpeg
 from faster_whisper import WhisperModel
 from googletrans import Translator
 from scipy.io import wavfile
-# from aeneas.executetask import ExecuteTask
 import pydub
-# from aeneas.task import Task
 from gtts import gTTS
 
 import os
-# from dotenv import load_dotenv
-# load_dotenv()
 
 # translator = Translator(service_urls=['translate.googleapis.com'])
 translator = Translator()
@@ -26,7 +22,6 @@ extracted_audio_location = 'process/audio/'
 out_lan = 'en'
 model_size = "medium"
 
-# TODO: tts over subtitles, OpenAI
 prompt = (
     f"This is a podcast audio file that teaches how to use Microsoft Power BI."
     f"It was created in native spanish from latin america."
@@ -172,7 +167,7 @@ def generate_subtitle_file(translated, language, segments):
         print(f"[Line 149] Error generate subtitle file: {e}.")
         return None
 
-    # return originL_subtitle_file, trans_subtitle_file
+    # return originl_subtitle_file, trans_subtitle_file
 
 
 def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
@@ -269,6 +264,5 @@ def run():
         os.remove(f"output-{input_video_name}.mp4")
     if os.path.isfile(f"translated-audio-{input_video_name}.wav"):
         os.remove(f"translated-audio-{input_video_name}.wav")
-
 
 run()
