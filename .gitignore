@@ -1,10 +1,10 @@
 .env
 old/
 
-.wav
-.mp4
-.avi
-.mkv
+*.wav
+*.mp4
+*.avi
+*.mkv
 
 .git/
 lib/
