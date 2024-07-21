@@ -30,7 +30,7 @@ prompt = (
     f"Teacher is Sonia a female whose native language is spanish from Latin America.  Her talk is highly technical."
     f"This file will be transcribed and translated to multiple languages"
     f"Teacher uses statistical language,  average, mode, mean, max, and many more statistical words and concepts."
-    f"Teacher uses a dataset Athletes Events contains data of Olympic events from 1896 to 2016."
+    f"Teacher uses a dataset that contains data of Olympic events from 1896 to 2016. The file's name is Athletes Events"
     f"It contains data about year of event, country, delegations, athletes ages, athletes height, weight, Body Mass Index BMI."
     f"It contains the list of medals earned by each delegation."
     f"Este es un podcast en lenguaje Español Latino que enseña o instruye sobre el uso de Microsoft PowerBI"
@@ -215,7 +215,6 @@ def text_to_speech(text, language):
     except Exception as e:
         print(f"[Line 193] Error text to speech: {e}.")
         return None
-
 
 def add_translated_audio_to_video():
     try:
