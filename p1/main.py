@@ -1,4 +1,5 @@
 # https://www.digitalocean.com/community/tutorials/how-to-generate-and-add-subtitles-to-videos-using-python-openai-whisper-and-ffmpeg 
+# https://medium.com/@afiori_78621/transcribing-audio-in-python-using-vosk-def7487a8719
 
 import time
 import math
@@ -11,6 +12,7 @@ import pydub
 from gtts import gTTS
 import os
 import re
+import uuid
 
 # translator = Translator(service_urls=['translate.googleapis.com'])
 translator = Translator()
@@ -20,6 +22,7 @@ input_video_name, file_ext = os.path.splitext(input_video)
 source_location = 'source/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
+#model_size = "distil-large-v3"
 model_size = "medium"
 
 spacy_models = {
@@ -84,7 +87,6 @@ def clean_audio():
 def extract_audio():
     # ffmpeg -i 1.mp4 -acodec pcm_s16le -f s16le -ac 1 -ar 16000 -f wav audio.wav
     extracted_audio = f"audio-{input_video_name}.wav"
-    print("jea 57")
     try:
         input = ffmpeg.input(input_video)
         audio = input.audio
@@ -93,7 +95,7 @@ def extract_audio():
         # .output('-', format='s16le', acodec='pcm_s16le', ac=1, ar='16k' )
         # **{'acodec:pcm'}
     except OSError as e:
-        print(f"[Line 54] Error extracting audio from video: {e.stderr}.")
+        print(f"[Line 76] Error extracting audio from video: {e.stderr}.")
         return None
 
 
@@ -123,15 +125,15 @@ def transcribe_audio(audio):
 
         return language, segments
     except Exception as e:
-        print(f"[Line 62] Error transcribing audio: {e}.")
+        print(f"[Line 99] Error transcribing audio: {e}.")
         return None
 
 
 def translate_text(text, input_lan, out_lan):
     try:
-        return translator.translate(str(text), src=str(input_lan), dest=out_lan).text
+        return translator.translate(str(text), dest=out_lan, src=str(input_lan)).text
     except Exception as e:
-        print(f"[Line 87] Error translating text: {e}.")
+        print(f"[Line 129] Error translating text: {e}.")
         return None
 
 
@@ -146,7 +148,7 @@ def format_time(seconds):
         formatted_time = f"{hours:02d}:{minutes:02d}:{seconds:01d},{milliseconds:03d}"
         return formatted_time
     except Exception as e:
-        print(f"[Line 94] Error time format: {e}.")
+        print(f"[Line 137] Error time format: {e}.")
         return None
 
 
@@ -165,11 +167,11 @@ def generate_subtitle_file(translated, language, segments):
             segment_end = format_time(segment.end)
             trans_text += f"{str(index+1)} \n"
             trans_text += f"{segment_start} --> {segment_end} \n"
-            trans_text += f"{translate_text(segment.text, language, out_lan)} \n"
+            trans_text += f"{translate_text(segment.text, out_lan, language)} \n"
             trans_text += "\n"
             duration = segment.end - segment.start
             # trans_text_to_read += f"{segment_start} ---> {segment_end} duration: {duration:.2} \n"
-            trans_text_to_read += f"{translate_text(segment.text, language, out_lan)} \n"
+            trans_text_to_read += f"{translate_text(segment.text, out_lan, language)} \n"
             trans_text_to_read += "\n"
 
         original_subtitle_file = f"sub-{input_video_name}-{language}.srt"
@@ -191,7 +193,7 @@ def generate_subtitle_file(translated, language, segments):
         g.write(original_text)
         g.close()
     except Exception as e:
-        print(f"[Line 149] Error generate subtitle file: {e}.")
+        print(f"[Line 152] Error generate subtitle file: {e}.")
         return None
 
     # return originl_subtitle_file, trans_subtitle_file
@@ -216,17 +218,19 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
                                    vf=f"subtitles={subtitle_file}")
             ffmpeg.run(stream, overwrite_output=True)
     except Exception as e:
-        print(f"[Line 156] Error add subtitle to video: {e}.")
+        print(f"[Line 199] Error add subtitle to video: {e}.")
         return None
 
 
 def text_to_speech(text, tld, target_lang):
+    audio_file = f"translated_audio-{input_video_name}-{str(uuid.uuid4())}.wav"
+
     try:
         f = open(text)
-        tts = gTTS(f.read(), lang=target_lang, tld=tld, lang_check=True)
+        tts = gTTS(f.read(), lang=target_lang, tld=tld, slow=True, lang_check=True)
         tts.save(f"translated-audio-{input_video_name}.wav")
     except Exception as e:
-        print(f"[Line 193] Error text to speech: {e}.")
+        print(f"[Line 222] Error text to speech: {e}.")
         return None
 
 def add_translated_audio_to_video():
@@ -242,7 +246,7 @@ def add_translated_audio_to_video():
         stream = ffmpeg.output(stream, f"final-{input_video_name}.mp4")
         ffmpeg.run(stream, overwrite_output=True)
     except Exception as e:
-        print(f"[Line 203] Error add translared audio to video: {e}.")
+        print(f"[Line 232] Error add translared audio to video: {e}.")
         return None
 
 # ///// dubbing
