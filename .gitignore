@@ -44,6 +44,8 @@ log/
 *.obj
 
 *.csv
+*.srt
+*.txt
 
 *.h5
 *.keras

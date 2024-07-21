@@ -9,18 +9,51 @@ from googletrans import Translator
 from scipy.io import wavfile
 import pydub
 from gtts import gTTS
-
 import os
+import re
 
 # translator = Translator(service_urls=['translate.googleapis.com'])
 translator = Translator()
 
 input_video = input("Name of video file to process: ")
 input_video_name, file_ext = os.path.splitext(input_video)
-source_location = 'source/video/'
+source_location = 'source/'
 extracted_audio_location = 'process/audio/'
 out_lan = 'en'
 model_size = "medium"
+
+spacy_models = {
+    "english":"en_core_web_sm",
+    "german":"de_core_news_sm",
+    "french":"fr_core_news_sm",
+    "italian":"it_core_news_sm",
+    "catalan":"ca_core_news_sm",
+    "chinese":"zh_core_web_sm",
+    "croatian":"hr_core_news_sm",
+    "danish":"da_core_news_sm",
+    "dutch":"nl_core_news_sm",
+    "finnish":"fi_core_news_sm",
+    "greek":"el_core_news_sm",
+    "japanese":"ja_core_news_sm",
+    "korean":"ko_core_news_sm",
+    "lithuanian":"lt_core_news_sm",
+    "macedonian":"mk_core_news_sm",
+    "polish":"pl_core_news_sm",
+    "portuguese":"pt_core_news_sm",
+    "romanian":"ro_core_news_sm",
+    "russian":"ru_core_news_sm",
+    "spanish":"es_core_news_sm",
+    "swedish":"sv_core_news_sm",
+    "ukranian":"uk_core_news_sm"
+}
+
+ABBREVIATIONS = {
+    "avg":"average",
+    "max": "Maximum",
+    "min": "Minimum"
+}
+
+ISWORD = re.compile(r'.*\.*')
 
 prompt = (
     f"This is a podcast audio file that teaches how to use Microsoft Power BI."
@@ -36,7 +69,7 @@ prompt = (
     f"Este es un podcast en lenguaje Español Latino que enseña o instruye sobre el uso de Microsoft PowerBI"
     f"El texto es tecnico.  Habla sore estadistica, datos, medidas, series de tiempo, calculos, columnas, filas, tablas."
     f"Usa un dataset o fuente de datos que contiene data de todas las Olimpiadas:  pais,  equipo, medallas, genero, edad.  Usa palabras como atleta, equipo, muestra, polacion, moda, promedio, average, desviacion estandar."
-    f"common words: average x, sum x, "
+    f"common words: average x, sum x, max, min, maximum, minimum, promedio, media, desviacion estandar, standard, deviation"
 )
 
 
@@ -62,12 +95,6 @@ def extract_audio():
     except OSError as e:
         print(f"[Line 54] Error extracting audio from video: {e.stderr}.")
         return None
-
-
-def split_audio():
-    pydub.silence.detect_nonsilent(
-        normalized_sound, min_silence_len=min_slient, silence_tresh=-20.0 - thd, seek_step=1)
-    return 1
 
 
 def transcribe_audio(audio):
@@ -193,24 +220,10 @@ def add_subtitle_to_video(soft_subtitle, subtitle_file, subtitle_language):
         return None
 
 
-def force_alignment(text, audiuo):
-    string = "task_language=es|is_text_type=subtitles|os_task_file_format=srt"
-    return 1
-
-
-def read_text(file):
-    try:
-        f = open(file, 'r')
-        return str(f.read())
-    except Exception as e:
-        print(f"[Line 184] Error read text: {e}.")
-        return None
-
-
-def text_to_speech(text, language):
+def text_to_speech(text, tld, target_lang):
     try:
         f = open(text)
-        tts = gTTS(f.read(), lang='en', tld='us')
+        tts = gTTS(f.read(), lang=target_lang, tld=tld, lang_check=True)
         tts.save(f"translated-audio-{input_video_name}.wav")
     except Exception as e:
         print(f"[Line 193] Error text to speech: {e}.")
@@ -232,10 +245,19 @@ def add_translated_audio_to_video():
         print(f"[Line 203] Error add translared audio to video: {e}.")
         return None
 
+# ///// dubbing
+def split_audio():
+    pydub.silence.detect_nonsilent(
+        normalized_sound, min_silence_len=min_slient, silence_tresh=-20.0 - thd, seek_step=1)
+    return 1
+
+def force_alignment(text, audiuo):
+    string = "task_language=es|is_text_type=subtitles|os_task_file_format=srt"
+    return 1
+# //////
 
 def run():
     extract_audio()
-    # split_audio()
     clean_audio()
     source_audio = f"clean-audio-{input_video_name}.wav"
     language, segments = transcribe_audio(source_audio)
@@ -243,7 +265,7 @@ def run():
     subtitle_file = generate_subtitle_file(
         translated=True, language=language, segments=segments
     )
-    text_to_speech(f"translated-{input_video_name}.txt", 'en')
+    text_to_speech(f"translated-{input_video_name}.txt", 'us', 'en')
 
     add_subtitle_to_video(
         soft_subtitle=True,
