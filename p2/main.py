@@ -1,30 +1,60 @@
-# googletrans==3.1.0a0
-from googletrans import Translator 
-
+# https://www.geeksforgeeks.org/python-speech-recognition-on-large-audio-files/
 import speech_recognition as sr
-
-from gtts import gTTS
 import os
 
-translator = Translator()
+from pydub import AudioSegment
+from pydub.silence import split_on_silence
 
-source = open('source/text/ts-1.txt')
-source = source.read()
-dest_lan = 'en'
+def silence_based_conversion(path= "68.wav"):
+    song = AudioSegment.from_wav(path)
 
-def detect_input_language(text):
-    input_lan = translator.detect(str(text))
-    print(input_lan)
-    return input_lan
-def translate(text, dest_lan):
-    t = translator.translate(text, src= 'he', dest=dest_lan)
-    #print(str(t))
-    f = open('res.txt', 'w')
-    f.write(str(t.text))
+    chunks = split_on_silence(song, min_silence_len=500, silence_thresh=-16)
+    
+    fh = open('transcribed.txt', 'a+')
 
+    try:
+        os.mkdir('audio_chunks')
+    except(FileExistsError):
+        pass
 
-def run():
-    detect_input_language(source)
-    translate(str(source), dest_lan)
+    os.chdir('audio_chunks')
 
-run()
+    i = 0
+
+    for chunk in chunks:
+        chunk_silent = AudioSegment.silent(duration = 10)
+
+        audio_chunk = chunk_silent + chunk + chunk_silent
+
+        print("... saving chunk{0}.wav".format(i))
+        audio_chunk.export("./chunk{0}.wav".format(i), bitrate = '192k', format = "wav")
+
+        filename = 'chunk'+str(i)+'.wav'
+
+        print("Processing chunk "+str(i)) 
+
+        file = filename
+        r = sr.Recognizer()
+
+        with sr.AudioFile(file) as source:
+            r.adjust_for_ambient_noise(source)
+            audio_listened = r.listen(source)
+        try:
+            rec = r.recognize_google(audio_listened)
+            fh.write(rec+". ")
+
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+
+        except sr.RequestError as e:
+            print("Could not request results. Check your internet connection")
+
+        i += 1
+
+    os.chdir('..')
+
+if __name__ == '__main__':
+    print("Enter audio file path")
+    path = input()
+
+silence_based_conversion()
