@@ -1,6 +1,5 @@
 # https://www.digitalocean.com/community/tutorials/how-to-generate-and-add-subtitles-to-videos-using-python-openai-whisper-and-ffmpeg 
 
-from pathlib import Path
 import time
 import math
 from pathlib import Path
