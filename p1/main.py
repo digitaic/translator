@@ -1,3 +1,5 @@
+# https://www.digitalocean.com/community/tutorials/how-to-generate-and-add-subtitles-to-videos-using-python-openai-whisper-and-ffmpeg 
+
 from pathlib import Path
 import time
 import math
@@ -63,7 +65,7 @@ def extract_audio():
         ffmpeg.run(audio, overwrite_output=True)
         # .output('-', format='s16le', acodec='pcm_s16le', ac=1, ar='16k' )
         # **{'acodec:pcm'}
-    except ffmpeg.Error as e:
+    except OSError as e:
         print(f"[Line 54] Error extracting audio from video: {e.stderr}.")
         return None
 

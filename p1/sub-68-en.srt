@@ -8,7 +8,7 @@ X, average and average x, Max and Max X, Mean and Mean X.The difference between 
 
 3 
 00:00:17,440 --> 00:00:25,000 
-Average x is that average calculates the average of a specific column throughout the table, 
+None 
 
 4 
 00:00:25,000 --> 00:00:32,080 
@@ -16,7 +16,7 @@ While Average X calculates the average of a personalized expression evaluated
 
 5 
 00:00:32,080 --> 00:00:38,900 
-row per row in a table and then take the average of those results.An expression 
+None 
 
 6 
 00:00:38,900 --> 00:00:44,780 
@@ -36,7 +36,7 @@ As we said that it is Age average and this will be equal to average x, here it i
 
 10 
 00:01:10,000 --> 00:01:15,020 
-of the values ​​that are in each row for the different games, that is, 
+None 
 
 11 
 00:01:15,020 --> 00:01:23,820 
@@ -56,7 +56,7 @@ And we close parentheses and enter.
 
 15 
 00:01:53,480 --> 00:02:1,160 
-Here we have our Age Avenge measure.Average x allows us to get the average 
+None 
 
 16 
 00:02:1,160 --> 00:02:6,000 
@@ -72,7 +72,7 @@ Let's open a page, let's call it x
 
 19 
 00:02:18,840 --> 00:02:23,880 
-And we are going to create a matrix and place Games in Rows 
+None 
 
 20 
 00:02:26,400 --> 00:02:33,240 
@@ -96,7 +96,7 @@ Olympic Events dataset and we are going to click on the header of the AGE variab
 
 25 
 00:03:7,940 --> 00:03:12,000 
-We verify that the data type is an integer, effectively has the 
+None 
 
 26 
 00:03:12,000 --> 00:03:18,980 
@@ -132,5 +132,5 @@ The average age of each Olympiad age.In the next class we will see the
 
 34 
 00:04:8,360 --> 00:04:11,380 
-Rank X function, see you. 
+None 
 

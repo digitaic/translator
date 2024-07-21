@@ -22,9 +22,9 @@ For each of the Olympic Games.So that means the values ​​of Games,
 
 We close parentheses, eat and let's calculate, calculate for each of 
 
-Those games the average of the age colon. 
+None 
 
-And we close parentheses and enter. 
+None 
 
 Here we have our Age Avenge measure.Average x allows us to get the average 
 
@@ -36,7 +36,7 @@ Let's open a page, let's call it x
 
 And we are going to create a matrix and place Games in Rows 
 
-And the new measure in Values, Age average in Values. 
+None 
 
 And so we can see the average age in each of the Olympics and the average 
 
